@@ -23,7 +23,7 @@ class URLParser(HTMLParser):
         self.urls = []
 
 # zoek in het www.uu.nl domein
-webpage = "http://www.uu.nl/organisatie/nieuws-en-agenda"
+webpage = "http://www.uu.nl/"
 #De basis url, eigenlijk de map waar we zitten.
 #De standaard is dat het niet op een '/' eindigd en ook niet op .htm(l)
 if(webpage.endswith(".html" or ".htm") ):
@@ -50,13 +50,6 @@ parser.feed(str(page_content))
 #print(parser.urls)
 
 urls = []
-parser.urls.append("../test.html/")
-
-parser.urls.append("../")
-
-parser.urls.append("./test.html")
-
-parser.urls.append("test.htm")
 
 for item in parser.urls:
     #We halen de links naar op de pagina weg (bijv. uu.nl/index.html#main)    
@@ -100,8 +93,6 @@ for item in parser.urls:
             urls.append(temp)
 
 finalurls = []
-urls.append("test.com/")
-urls.append("test2.com/index.html")
 #We willen nu nog duplicaten eruit halen
 for item in urls:
     temp = item
