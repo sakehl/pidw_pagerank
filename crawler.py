@@ -31,11 +31,11 @@ def pagecrawler(base, name, queue, crawled, wholequeue):
     #De basis url, eigenlijk de map waar we zitten.
     #De standaard is dat het niet op een '/' eindigd en ook niet op .htm(l)
     if(webpage.endswith(".html" or ".htm") ):
-        basepage = (webpage.split("uu.nl")[-1]).split("/")[:-1]
+        basepage = (webpage.split(base)[-1]).split("/")[:-1]
     elif(webpage.endswith("/")):
-        basepage = (webpage.split("uu.nl")[-1]).split("/")[:-1]
+        basepage = (webpage.split(base)[-1]).split("/")[:-1]
     else:
-        basepage = (webpage.split("uu.nl")[-1]).split("/")
+        basepage = (webpage.split(base)[-1]).split("/")
     
     # maak een object aan die links kan herkennen
     parser = URLParser()
@@ -48,6 +48,11 @@ def pagecrawler(base, name, queue, crawled, wholequeue):
         with open("exceptions","a") as f:
             f.write(name+"\n")
         return None
+    
+    #We willen als we crawlen meteen even de titel en omschrijving bekijken, zodat we hier sneller op kunnen zoeken.
+    #Deze zijn vaak geoptimallisseerd voor search engines 
+    deel_omschrijving = str(page_content).partition('<meta name="description" content="')[2]
+    deel_titel = str(page_content).partition('"og:title" content="')[2]
 
     # voordat je de parser hergebruikt dien je hem eerst te legen
     parser.empty()
@@ -66,16 +71,17 @@ def pagecrawler(base, name, queue, crawled, wholequeue):
         temp = temp.split('#')[0]
         
         #De pagina moet op het uu.nl domein zijn, juist niet op students.uu.nl of iets dergelijks
-        if(temp.startswith("http://www.uu.nl") or temp.startswith("uu.nl")
-           or temp.startswith("http://uu.nl") or temp.startswith("www.uu.nl") ):
-            temp = temp[7:]
+        #De base moet beginnen met http://www. we gaan dan 4 combinaties af met of zonder www of http://
+        #base[11:] = uu.nl
+        if(temp.startswith(base) or temp.startswith(base[11:])
+           or temp.startswith(base[7:]) or temp.startswith(base[:7]+base[11:]) ):
             #We willen alleen het gedeelte zien na de uu.nl, dus het is een relatieve URL
-            temp = temp.split('uu.nl')
+            temp = temp.split(base[11:])
             urls.append(temp[-1])
         
         #Hier krijgen we alle relatieve urls mee te pakken
         elif(not (temp.startswith("http://") or temp.startswith("https://")) ):
-            #We don't want // urls, they link to other webpages
+            #We willen geen // urls, die linken naar andere webpagina's
             if(temp.startswith("//")):
                 pass
             #Dit format is geweldig!
@@ -122,9 +128,6 @@ def pagecrawler(base, name, queue, crawled, wholequeue):
         if(temp.find("?") != -1):
             print("Skipping " + temp +" because of ?")
             continue
-        if(temp.find("#") != -1):
-            print("Skipping " + temp +" because of #")
-            continue
         if(temp.find("%") != -1):
             print("Skipping " + temp +" because of %")
             continue
@@ -135,8 +138,10 @@ def pagecrawler(base, name, queue, crawled, wholequeue):
     
     
     crawled[name].append(finalurls)
+    #We schrijven onze data weg, eerst komt de site, dan komt de titel met omschrijving en dan alle links
     with open("crawldata","a") as f:
-        f.write(name+",")
+        f.write(name + ",")
+        f.write(deel_titel + " " + deel_omschrijving + ",")
         for item in finalurls:
             f.write(item+",")
         f.write("\n")
@@ -178,8 +183,9 @@ try:
         for line in f:
             #We willen de /n niet mee, die neemt die anders wel mee en we splitten op ','
             temp = line.split(",")[0:-1]
-            if(len(temp)>1):
-                crawled[temp[0]].append(temp[1:])
+            ##De reden dat we pas vanaf de tweede kijken, is omdat eerst de link zelf komt, dan titel met metadata en dan pas de links
+            if(len(temp)>2):
+                crawled[temp[0]].append(temp[2:])
             else:
                 crawled[temp[0]].append({})
 except FileNotFoundError:
