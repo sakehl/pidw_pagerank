@@ -53,6 +53,11 @@ def pagecrawler(base, name, queue, crawled, wholequeue):
     #Deze zijn vaak geoptimallisseerd voor search engines 
     deel_omschrijving = str(page_content).partition('<meta name="description" content="')[2]
     deel_titel = str(page_content).partition('"og:title" content="')[2]
+    #Neem alleen de omschrijving en de titel en mogen geen komma's in, anders gaat fout met opslaan
+    omschrijving = deel_omschrijving.partition('"')[0]
+    omschrijving = omschrijving.replace(',',' ')
+    titel = deel_titel.partition('"')[0]
+    titel = titel.replace(',',' ')
 
     # voordat je de parser hergebruikt dien je hem eerst te legen
     parser.empty()
@@ -139,14 +144,14 @@ def pagecrawler(base, name, queue, crawled, wholequeue):
     
     crawled[name].append(finalurls)
     #We schrijven onze data weg, eerst komt de site, dan komt de titel met omschrijving en dan alle links
-    with open("crawldata","a") as f:
+    with open("data/crawldata","a") as f:
         f.write(name + ",")
-        f.write(deel_titel + " " + deel_omschrijving + ",")
+        f.write(titel + " " + omschrijving + ",")
         for item in finalurls:
             f.write(item+",")
         f.write("\n")
     
-    f2 = open("wholequeue","a")
+    f2 = open("data/wholequeue","a")
     for item in finalurls:
         if(item not in wholequeue):
             q.put(item)
@@ -154,7 +159,7 @@ def pagecrawler(base, name, queue, crawled, wholequeue):
             f2.write(item + "\n")
     f2.close()
     
-    with open("finishcrawl","a") as f:
+    with open("data/finishcrawl","a") as f:
         f.write(name +"\n")
     
     # dataout = "data/"+ name.replace("/",">")+".txt"
@@ -179,7 +184,7 @@ wq = set([])
 
 #We lezen alles in wat al is gecrawled is
 try:
-    with open("crawldata","r") as f:
+    with open("data/crawldata","r") as f:
         for line in f:
             #We willen de /n niet mee, die neemt die anders wel mee en we splitten op ','
             temp = line.split(",")[0:-1]
@@ -193,7 +198,7 @@ except FileNotFoundError:
 
 #we lezen alles in wat in de queue staat om nog gecrawled te worden, behalve als die al in crawldata stond
 try:
-    with open("wholequeue","r") as f:
+    with open("data/wholequeue","r") as f:
         for line in f:
             temp = line.split("\n")[0]
             #voegen hem toe aan de wholequeue

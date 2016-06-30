@@ -1,3 +1,5 @@
+weppage = "http://www.uu.nl"
+
 #Zet de sourcecode om in een string
 d = str(urllib.request.urlopen(webpage).read())
 #Neem deel van de sourcecode dat alles vanaf de omschrijving en de titel hebben.
