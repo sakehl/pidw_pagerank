@@ -7,12 +7,6 @@ def zoek(woord,dictonary):
         if overeenkomst != -1:
             match.append(item)
     return match
-            
-def resultaat(pr_lijst,match_lijst):
-    uitkomst = [1]*len(pr_lijst)
-    for i in range(len(uitkomst)):
-        uitkomst[i] = (pr_lijst[i]*match_lijst[i],i)
-    uitkomst.sort()
 
 metadict = defaultdict(list)
 pagedict = defaultdict(list)
