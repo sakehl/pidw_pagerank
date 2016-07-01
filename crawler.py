@@ -50,6 +50,7 @@ def pagecrawler(base, name, queue, crawled, wholequeue):
         return None
     
     #We kijken of deze link al is gezien is, wellicht onder een andere naam
+    #Bij we webpagina staat vaak de canonlink en shortlink, die zeggen op welke link de pagina te vinden is
     try:
         canonlink = str(page_content).split('<link rel="canonical" href="')[-1].split('"')[0]
         shortlink = str(page_content).split('<link rel="shortlink" href="')[-1].split('"')[0]   
@@ -71,10 +72,9 @@ def pagecrawler(base, name, queue, crawled, wholequeue):
         titel = deel_titel.partition('"')[0]
         titel = titel.replace(',',' ')
     except:
-        print(name + "gaf een error, is waarschijnljk geen normale webpagina, we gaan verder zoeken")
-        with open("data/exceptions","a") as f:
-            f.write(name+"\n")
-        return None
+        print(name + "gaf een error, is moeilijker om op te zoeken. We slaan alleen de link op als op te zoeken")
+        titel = ""
+        omschrijving = ""
 
     # voordat je de parser hergebruikt dien je hem eerst te legen
     parser.empty()

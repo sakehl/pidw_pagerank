@@ -25,7 +25,7 @@ def resultaat(pr_lijst,match_lijst):
 
 metadict = defaultdict(list)
 pagedict = defaultdict(list)
-with open("crawldata","r") as f:
+with open("data/crawldata","r") as f:
     for line in f:
         #We willen de /n niet mee, die neemt die anders wel mee en we splitten op ','
         temp = line.split(",")[0:-1]
