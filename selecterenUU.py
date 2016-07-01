@@ -26,7 +26,54 @@ def resultaat(links,uitkomst):
     for a,b in pr_lijst:
         bestelinks.append(b)
     return bestelinks
+
+def linksmaker(link, links):
+    links_link = []
+    for item in pagedict[link][0]:
+        if item in links:
+            links_link.append(item)
+    return links_link
+
+def vuller(links, kolommen, rijen):
+    maxl = 400
+    if(len(links) > maxl):
+        links.sort(key = len)
+        links = links[0:maxl]
+    for i in links:
+        indi = links.index(i)
+        linki = linksmaker(i, links)
+        kolommen.append(indi)
+        rijen.append(indi)
+        for j in links:
+            indj = links.index(j)
+            if j in linki:
+                if indj > indi:
+                    kolommen.append(indi)
+                    rijen.append(indj)
+                    kolommen.append(indj)
+                    rijen.append(indi)
+                elif indj < indi:
+                    if (i in linksmaker(j, links)) == False:
+                        kolommen.append(indi)
+                        rijen.append(indj)
+                        kolommen.append(indj)
+                        rijen.append(indi)
+    return links
+
+def pageranker(links):
+    kolommen = []
+    rijen = []
+    links = vuller(links, kolommen, rijen)
+    Enen = len(kolommen)*[1]
+    n = len(links)
+    vector = n*[1]
+    bogenmatrix = coo_matrix((Enen, (kolommen, rijen)), shape=(n,n)).toarray()
+    norm_bogenmatrix = normalize(bogenmatrix)
+    macht_bogenmatrix = np.linalg.matrix_power(norm_bogenmatrix, 50)
+    verhouding = macht_bogenmatrix.dot(vector)
+    uitkomst = normalize(verhouding)
     
+    return resultaat(links,uitkomst)
 
 metadict = defaultdict(list)
 pagedict = defaultdict(list)
@@ -41,76 +88,29 @@ with open("data/crawldata","r") as f:
         else:
             pagedict[temp[0]].append({})
             
-temp = zoek('informatica', metadict)
-for item in temp:
-   # print(temp[temp.index(item)])
-    temp2 = []
-    for item2 in pagedict[item][0]:
-        if item2 in temp:
-            temp2.append(item2)
-    #print(item + " " + str(temp2))
-
-#f = open('LinksUU', 'r')
-#links = f.read()
-#f.close()
-#links = links[1:-1].split(", ")
-#print(links)
-
-links = zoek('informatica', metadict)
-
-def linksmaker(link, links):
-    links_link = []
-    for item in pagedict[link][0]:
-        if item in links:
-            links_link.append(item)
-    return links_link
-
-#print(linksmaker(links[0], links))
-#print(links[0])
-
-kolommen = []
-
-rijen = []
-   
-
-def vuller(links):
-    for i in links:
-        kolommen.append(links.index(i))
-        rijen.append(links.index(i))
-    for i in links:
-        for j in links:
-            if j in linksmaker(i, links) and links.index(j) > links.index(i):
-                kolommen.append(links.index(i))
-                rijen.append(links.index(j))
-                kolommen.append(links.index(j))
-                rijen.append(links.index(i))
-            elif j in linksmaker(i, links) and links.index(j) < links.index(i):
-                if (i in linksmaker(j, links)) == False:
-                    kolommen.append(links.index(i))
-                    rijen.append(links.index(j))
-                    kolommen.append(links.index(j))
-                    rijen.append(links.index(i))
-
-vuller(links)
-#print(kolommen)
-#print(rijen)
-
-Enen = len(kolommen)*[1]
-n = len(links)
-vector = n*[1]
-bogenmatrix = coo_matrix((Enen, (kolommen, rijen)), shape=(n,n)).toarray()
-#print(np.linalg.det(bogenmatrix))
-#print(np.linalg.norm(bogenmatrix))
-norm_bogenmatrix = normalize(bogenmatrix)
-#print(np.linalg.det(norm_bogenmatrix))
-#print(np.linalg.norm(norm_bogenmatrix))
-macht_bogenmatrix = np.linalg.matrix_power(norm_bogenmatrix, 100)
-verhouding = macht_bogenmatrix.dot(vector)
-uitkomst = normalize(verhouding)
-
-#print(bogenmatrix)
-#print(macht_bogenmatrix)
-#print(uitkomst)
-
-text = open('Pagerank', 'w')
-text.write(str(uitkomst))
+print("Welkom bij de SAZUUP (Super Awesome Zoekmachine van de UU Pagina)." )
+while(True):
+    print("Zoek wat je wilt en druk op [enter]. [Q]uit als je klaar bent met zoeken.")
+    zoekwoord = input()
+    if(zoekwoord.lower() in ["q","quit","exit","klaar"]):
+        break
+    links = zoek(zoekwoord, metadict)
+    if(len(links) == 0):
+        print("Helaas geen resultaten gevonden. :(")
+    else:
+        print("We hebben " + str(len(links)) + " resultaten gevonden.")
+        if(len(links) > 400):
+            print("We geven alleen de eerste 400 resultaten weer.")
+        result = pageranker(links)
+        i = 0
+        for item in result:
+            print(metadict[item][0])
+            print("\t" + "http://www.uu.nl" + item)
+            i += 1
+            if(i%10 == 0):
+                print("volgende 10 resultaten? [j]a/[n]ee")
+                test = input().lower()
+                if(test in ["j", "ja"]):
+                    continue
+                else:
+                    break

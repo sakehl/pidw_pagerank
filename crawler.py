@@ -1,15 +1,14 @@
 #!/usr/bin/python3
 
-# Author: Jan-Willem Buurlage <janwillembuurlage@gmail.com>
+# Author: Lars van den Haak, Michael van den Hoogenband en Nijs van Tuijl
+# Gebasseerd op versie van Jan-Willem Buurlage <janwillembuurlage@gmail.com>
 #
-# Dit script maakt een lijst van webpagina's waarnaar gelinkt wordt vanaf een
-# gegeven webpagina, de website van de UU.
+# Dit script crawlt de uu pagina en zijn subpagina's. Ook slaat deze alles op.
+# Hiermee kun je een zoekmachine implementeren
 
 import urllib.request
 from html.parser import HTMLParser
-import os.path
 import queue
-#from multiprocessing import Queue
 from collections import defaultdict
 
 # deze parser objecten zijn in staat om uit een HTML bestand alle
@@ -28,7 +27,7 @@ class URLParser(HTMLParser):
 def pagecrawler(base, name, queue, crawled, wholequeue):
     # zoek in het www.uu.nl domein
     webpage = base + name
-    #De basis url, eigenlijk de map waar we zitten.
+    #De basis url, eigenlijk de map waar we zitten. Nodig voor relatieve urls
     #De standaard is dat het niet op een '/' eindigd en ook niet op .htm(l)
     if(webpage.endswith(".html" or ".htm") ):
         basepage = (webpage.split(base)[-1]).split("/")[:-1]
@@ -180,20 +179,7 @@ def pagecrawler(base, name, queue, crawled, wholequeue):
     
     with open("data/finishcrawl","a") as f:
         f.write(name +"\n")
-    
-    # dataout = "data/"+ name.replace("/",">")+".txt"
-    
-    # if(not os.path.isfile(dataout)):
-    #     with open(dataout, 'w') as f:
-    #         for item in finalurls:
-    #             print(item, file=f)
-    
-    # for item in finalurls:
-    #     datatest = "data/"+ item.replace("/",">")+".txt"
-    #     if(not os.path.isfile(datatest)):
-    #         print("Crawling " + base + item)
-    #         pagecrawler(base, item)
-    
+
     
 base = "http://www.uu.nl"
 
@@ -244,15 +230,4 @@ else:
         print("Crawling " + base + nextitem)
         pagecrawler(base, nextitem, q, crawled, wq)
 
-print("Done! Crawled everything")  
-# while(not q.empty() ):
-#     print(q.get())
-# print("-----")
-# for item in crawled:
-#     print(crawled[item])
-
-#with open("queue","w") as f:
-#    f.write(str(q))
-
-
-# print("Done")
+print("Done! Crawled everything")
