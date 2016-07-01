@@ -3,6 +3,7 @@ import numpy as np
 from scipy.sparse import coo_matrix
 from collections import defaultdict
 
+#Deze functie zoekt een woord in de metadata van onze links.
 def zoek(woord,dictonary):
     match = []
     for item in dictonary:
@@ -11,12 +12,14 @@ def zoek(woord,dictonary):
             match.append(item)
     return match
 
+#Hier kunnen we de PageRank waarden normaliseren
 def normalize(v):
     norm=np.linalg.norm(v)
     if norm==0: 
        return v
     return v/norm
     
+#Met deze functie sorteren we de gevonden links op hun PageRank en geven we een sorteerde lijst van links terug.
 def resultaat(links,uitkomst):
     pr_lijst = [1]*len(uitkomst)
     for i in range(len(links)):
@@ -27,6 +30,7 @@ def resultaat(links,uitkomst):
         bestelinks.append(b)
     return bestelinks
 
+#Deze functie haalt alle relevante links uit de dictionary.
 def linksmaker(link, links):
     links_link = []
     for item in pagedict[link][0]:
@@ -34,6 +38,7 @@ def linksmaker(link, links):
             links_link.append(item)
     return links_link
 
+#Hiermee vullen we onze bogenmatrix
 def vuller(links, kolommen, rijen):
     maxl = 400
     if(len(links) > maxl):
@@ -60,6 +65,7 @@ def vuller(links, kolommen, rijen):
                         rijen.append(indi)
     return links
 
+#Hier worden onze functies daadwerkelijk toegepast en maken we de uiteindelijke lijst van beste hits.
 def pageranker(links):
     kolommen = []
     rijen = []
@@ -75,8 +81,10 @@ def pageranker(links):
     
     return resultaat(links,uitkomst)
 
+#We creëren hier twee dictionary's om mee te werken.
 metadict = defaultdict(list)
 pagedict = defaultdict(list)
+#Hier vullen we de dictionary's met onze gevonden data van de UU pagina.
 with open("data/crawldata","r") as f:
     for line in f:
         #We willen de /n niet mee, die neemt die anders wel mee en we splitten op ','
@@ -87,7 +95,8 @@ with open("data/crawldata","r") as f:
             pagedict[temp[0]].append(temp[2:])
         else:
             pagedict[temp[0]].append({})
-            
+
+#Hier begint de interface van de zoekmachine, welke je in staat stelt om een woord te zoeken op de UU pagina
 print("Welkom bij de SAZUUP (Super Awesome Zoekmachine van de UU Pagina)." )
 while(True):
     print("Zoek wat je wilt en druk op [enter]. [Q]uit als je klaar bent met zoeken.")
