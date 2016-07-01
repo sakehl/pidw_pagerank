@@ -45,19 +45,36 @@ def pagecrawler(base, name, queue, crawled, wholequeue):
         page_content= urllib.request.urlopen(webpage).read()
     except:
         print("Ging iets mis met "+webpage)
-        with open("exceptions","a") as f:
+        with open("data/exceptions","a") as f:
             f.write(name+"\n")
         return None
     
-    #We willen als we crawlen meteen even de titel en omschrijving bekijken, zodat we hier sneller op kunnen zoeken.
-    #Deze zijn vaak geoptimallisseerd voor search engines 
-    deel_omschrijving = str(page_content).partition('<meta name="description" content="')[2]
-    deel_titel = str(page_content).partition('"og:title" content="')[2]
-    #Neem alleen de omschrijving en de titel en mogen geen komma's in, anders gaat fout met opslaan
-    omschrijving = deel_omschrijving.partition('"')[0]
-    omschrijving = omschrijving.replace(',',' ')
-    titel = deel_titel.partition('"')[0]
-    titel = titel.replace(',',' ')
+    #We kijken of deze link al is gezien is, wellicht onder een andere naam
+    try:
+        canonlink = str(page_content).split('<link rel="canonical" href="')[-1].split('"')[0]
+        shortlink = str(page_content).split('<link rel="shortlink" href="')[-1].split('"')[0]   
+        canonlink = canonlink.split(base)[1]
+        shortlink = shortlink.split(base)[1]
+        if(canonlink in crawled or shortlink in crawled):
+            print(name + "is a duplicate")
+            with open("data/exceptions","a") as f:
+                f.write(name+"\n")
+        
+        
+        #We willen als we crawlen meteen even de titel en omschrijving bekijken, zodat we hier sneller op kunnen zoeken.
+        #Deze zijn vaak geoptimallisseerd voor search engines 
+        deel_omschrijving = str(page_content).partition('<meta name="description" content="')[2]
+        deel_titel = str(page_content).partition('"og:title" content="')[2]
+        #Neem alleen de omschrijving en de titel en mogen geen komma's in, anders gaat fout met opslaan
+        omschrijving = deel_omschrijving.partition('"')[0]
+        omschrijving = omschrijving.replace(',',' ')
+        titel = deel_titel.partition('"')[0]
+        titel = titel.replace(',',' ')
+    except:
+        print(name + "gaf een error, is waarschijnljk geen normale webpagina, we gaan verder zoeken")
+        with open("data/exceptions","a") as f:
+            f.write(name+"\n")
+        return None
 
     # voordat je de parser hergebruikt dien je hem eerst te legen
     parser.empty()
@@ -125,6 +142,8 @@ def pagecrawler(base, name, queue, crawled, wholequeue):
         if(temp == ''):
             continue
         if(temp.find("mailto:") != -1):
+            continue
+        if(temp.find("javascript:") != -1):
             continue
         if(temp.find(".") != -1):
             if(temp.find(".htm") == -1):
