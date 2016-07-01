@@ -17,15 +17,20 @@ def normalize(v):
        return v
     return v/norm
     
-def resultaat(pr_lijst,match_lijst):
-    uitkomst = [1]*len(pr_lijst)
-    for i in range(len(uitkomst)):
-        uitkomst[i] = (pr_lijst[i]*match_lijst[i],i)
-    uitkomst.sort()
+def resultaat(links,uitkomst):
+    pr_lijst = [1]*len(uitkomst)
+    for i in range(len(links)):
+        pr_lijst[i] = (uitkomst[i],links[i])
+    pr_lijst.sort(reverse = True)
+    bestelinks = []
+    for a,b in pr_lijst:
+        bestelinks.append(b)
+    return bestelinks
+    
 
 metadict = defaultdict(list)
 pagedict = defaultdict(list)
-with open("crawldata","r") as f:
+with open("data/crawldata","r") as f:
     for line in f:
         #We willen de /n niet mee, die neemt die anders wel mee en we splitten op ','
         temp = line.split(",")[0:-1]
@@ -87,8 +92,8 @@ def vuller(links):
                     rijen.append(links.index(i))
 
 vuller(links)
-print(kolommen)
-print(rijen)
+#print(kolommen)
+#print(rijen)
 
 Enen = len(kolommen)*[1]
 n = len(links)
@@ -109,5 +114,3 @@ uitkomst = normalize(verhouding)
 
 text = open('Pagerank', 'w')
 text.write(str(uitkomst))
-
-print(resultaat(links, uitkomst))

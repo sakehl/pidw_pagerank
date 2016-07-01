@@ -25,4 +25,10 @@ def resultaat(pr_lijst,match_lijst):
     for i in range(len(uitkomst)):
         uitkomst[i] = (pr_lijst[i]*match_lijst[i],i)
     uitkomst.sort()
+    return uitkomst
+    
+def bestelinks(uitkomst):
+    links = []
+    for i in range(len(uitkomst)):
+        print()
     
