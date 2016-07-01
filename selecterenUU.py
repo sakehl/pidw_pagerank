@@ -64,7 +64,7 @@ def pageranker(links):
     kolommen = []
     rijen = []
     links = vuller(links, kolommen, rijen)
-    Enen = len(kolommen)*[1]
+    Enen = len(kolommen)*[1] #Maakt een data-lijst van enen, om in te vullen
     n = len(links)
     vector = n*[1]
     bogenmatrix = coo_matrix((Enen, (kolommen, rijen)), shape=(n,n)).toarray()
